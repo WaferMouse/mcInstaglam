@@ -6,9 +6,9 @@ from subprocess import call
 
 worldname = str(sys.argv[6])
 logdir = '/Users/joe/mcobjcmd/'
-worlddir = '/Users/joe/mcobjcmd/'
-outputdir = '/Users/joe/mcobjcmd/renders/'
-#workingdir = '/Users/joe/mcobjcmd/igtemp/'
+worlddir = '/Users/joe/worlds/'
+outputdir = '/Users/joe/renders/'
+workingdir = '/Users/joe/igtemp/'
 
 def dirty_trig(x,y,z): # This function is full of dirty dirty trig to return yaw and pitch in the Minecraft system for a given target coordinate
     hyp = math.sqrt((abs(x)**2)+(abs(z)**2)) # It's probably best to ignore the horrors that lie within
@@ -90,7 +90,7 @@ def export_chunklist():
 
 def add_obj(obj):
     x1,z1,x2,z2 = obj
-#    call(["java", "-jar", "jMc2Obj-dev_r276M.jar", "-s", "--objfile=x"+str(x1)+"-z"+str(z1)+".obj", "--height=50,256", "--area="+str(x1)+","+str(z1)+","+str(x2+32)+","+str(z2+64),worlddir+worldname])
+#    call(["java", "-jar", "jMc2Obj-dev_r276M.jar", "-s", "--objfile=x"+str(x1)+"-z"+str(z1)+".obj", "--output="+workingdir, "--height=50,256", "--area="+str(x1)+","+str(z1)+","+str(x2+32)+","+str(z2+64),worlddir+worldname])
     objlist.append(obj)
     return()
 
@@ -100,8 +100,8 @@ def import_objlist():
     print()
     count = 0
     for obj in objlist:
-        bpy.ops.import_scene.obj(filepath="x"+str(obj[0])+"-z"+str(obj[1])+".obj")
-#        os.remove("x"+str(obj[0])+"-z"+str(obj[1])+".obj")
+        bpy.ops.import_scene.obj(filepath=workingdir+"x"+str(obj[0])+"-z"+str(obj[1])+".obj")
+#        os.remove(workingdir+"x"+str(obj[0])+"-z"+str(obj[1])+".obj")
         count = count + 1
         print()
         print("----- Progress: "+str(count)+"-"+str(len(objlist))+" -----")
