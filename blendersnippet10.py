@@ -90,7 +90,7 @@ def export_chunklist():
 
 def add_obj(obj):
     x1,z1,x2,z2 = obj
-#    call(["java", "-jar", "jMc2Obj-dev_r276M.jar", "-s", "--objfile=x"+str(x1)+"-z"+str(z1)+".obj", "--output="+workingdir, "--height=50,256", "--area="+str(x1)+","+str(z1)+","+str(x2+32)+","+str(z2+64),worlddir+worldname])
+#    call(["java", "-jar", "jMc2Obj-dev_r276M.jar", "-s", "--objfile=x"+str(x1)+"-z"+str(z1)+".obj", "--output="+workingdir, "--height=50,256", "--area="+str(x1)+","+str(z1)+","+str(x2+32)+","+str(z2+64),worlddir+worldname]) #this does the actual export
     objlist.append(obj)
     return()
 
@@ -100,8 +100,8 @@ def import_objlist():
     print()
     count = 0
     for obj in objlist:
-        bpy.ops.import_scene.obj(filepath=workingdir+"x"+str(obj[0])+"-z"+str(obj[1])+".obj")
-#        os.remove(workingdir+"x"+str(obj[0])+"-z"+str(obj[1])+".obj")
+        bpy.ops.import_scene.obj(filepath=workingdir+"x"+str(obj[0])+"-z"+str(obj[1])+".obj") #does the work of importing the object to blender
+#        os.remove(workingdir+"x"+str(obj[0])+"-z"+str(obj[1])+".obj") #remove .obj file to prevent eating HDD space
         count = count + 1
         print()
         print("----- Progress: "+str(count)+"-"+str(len(objlist))+" -----")
@@ -293,6 +293,8 @@ c=0
 for mat in bpy.data.materials: # Illuminate!
     if mat.name.find('torch_flame') != -1:
         mat.emit = 4
+#NOTE: Blender's internal renderer imports torches with single sided planes.
+#TL;DR: Torches will only cast light from three quarters.  Solution pending.
 
 sceneKey = bpy.data.scenes.keys()[0]
 cameraNames=''
