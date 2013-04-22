@@ -5,10 +5,11 @@ from subprocess import call
 #from termcolor import colored, cprint
 
 worldname = str(sys.argv[6])
-logdir = '/Users/joe/mcobjcmd/'
-worlddir = '/Users/joe/worlds/'
-outputdir = '/Users/joe/renders/'
-workingdir = '/Users/joe/igtemp/'
+logdir = os.path.expanduser('~/mcobjcmd/')
+worlddir = os.path.expanduser('~/worlds/')
+outputdir = os.path.expanduser('~/renders/')
+workingdir = os.path.expanduser('~/igtemp/')
+javadir = os.path.expanduser('~/jmc2obj/')
 
 def dirty_trig(x,y,z): # This function is full of dirty dirty trig to return yaw and pitch in the Minecraft system for a given target coordinate
     hyp = math.sqrt((abs(x)**2)+(abs(z)**2)) # It's probably best to ignore the horrors that lie within
@@ -90,7 +91,7 @@ def export_chunklist():
 
 def add_obj(obj):
     x1,z1,x2,z2 = obj
-#    call(["java", "-jar", "jMc2Obj-dev_r276M.jar", "-s", "--objfile=x"+str(x1)+"-z"+str(z1)+".obj", "--output="+workingdir, "--height=50,256", "--area="+str(x1)+","+str(z1)+","+str(x2+32)+","+str(z2+64),worlddir+worldname]) #this does the actual export
+    call(["java", "-jar", javadir+"jMc2Obj-dev_r276M.jar", "-s", "--objfile=x"+str(x1)+"-z"+str(z1)+".obj", "--mtlfile=x"+str(x1)+"-z"+str(z1)+".mtl", "--output="+workingdir, "--height=50,256", "--area="+str(x1)+","+str(z1)+","+str(x2+32)+","+str(z2+64),worlddir+worldname]) #this does the actual export
     objlist.append(obj)
     return()
 
