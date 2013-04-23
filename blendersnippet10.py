@@ -107,7 +107,7 @@ def exportCellList():
 
 def addObj(obj):
     x1,z1,x2,z2 = obj
-#    call(["java", "-jar", jmc2obj, "-s", "--objfile=x"+str(x1)+"-z"+str(z1)+".obj", "--mtlfile=x"+str(x1)+"-z"+str(z1)+".mtl", "--output="+workingdir, "--height=50,256", "--area="+str(x1)+","+str(z1)+","+str(x2+32)+","+str(z2+64),worlddir+worldname]) #this does the actual export
+    call(["java", "-jar", jmc2obj, "-s", "--objfile=x"+str(x1)+"-z"+str(z1)+".obj", "--export=obj", "--output="+workingdir, "--height=50,256", "--area="+str(x1)+","+str(z1)+","+str(x2+32)+","+str(z2+64),worlddir+worldname]) #this does the actual export
     objlist.append(obj)
     return()
 
