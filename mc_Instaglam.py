@@ -13,8 +13,6 @@ jmc2objdir = os.path.expanduser('~/jmc2obj/') # Directory for jmc2obj .jar
 jmc2obj = jmc2objdir+'jMc2Obj-dev_r276M.jar' # jmc2obj .jar filename
 os.chdir(jmc2objdir)
 
-csvfile = open(logdir+'blendit-'+worldname+'.log', 'r', newline='')
-ofile = csv.reader(csvfile, delimiter=',')
 fov = 69
 viewdistance = 15
 cellList = []
@@ -258,6 +256,9 @@ def addActiveCamera(cam):
 print()
 print('Placing cameras')
 print()
+
+csvfile = open(logdir+'blendit-'+worldname+'.log', 'r', newline='')
+ofile = csv.reader(csvfile, delimiter=',')
 
 for row in ofile:
     x, y, z = float(row[3]), float(row[4]), float(row[5])
