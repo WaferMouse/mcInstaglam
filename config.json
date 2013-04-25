@@ -1,0 +1,13 @@
+{
+    "systemSettings": {
+        "logdir": "~/mcobjcmd/",
+        "worlddir": "~/worlds/",
+        "outputdir": "~/renders/",
+        "workingdir": "~/igtemp/",
+        "jmc2objdir": "~/jmc2obj/",
+        "jmc2obj": "jMc2Obj-dev_r276M.jar",
+        "fov": "69",
+        "viewdistance": "15",
+        "torchlight": "4"
+    }
+}
