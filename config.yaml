@@ -1,3 +1,5 @@
+# INSTALL NOTE: Copy lib3/yaml from the PyYAML package to blender/python/lib/python3.x/
+
 baseSettings: &base
     logdir: "~/mcobjcmd/"
     worlddir: "~/worlds/"

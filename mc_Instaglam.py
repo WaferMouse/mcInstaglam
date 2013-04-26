@@ -2,11 +2,8 @@ import bpy, math, csv, sys, bgl, blf, os
 from bpy import data, ops, props, types, context
 from math import pi
 from subprocess import call
-import json
 #from termcolor import colored, cprint
 import yaml
-
-# INSTALL NOTE: Copy lib3/yaml from the PyYAML package to blender/python/lib/python3.x/
 
 worldname = str(sys.argv[6])
 worldsettings = yaml.load(open('config.yaml'))['worlds'][worldname]
