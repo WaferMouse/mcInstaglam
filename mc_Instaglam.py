@@ -4,9 +4,12 @@ from math import pi
 from subprocess import call
 import json
 #from termcolor import colored, cprint
+import yaml
+
+# INSTALL NOTE: Copy lib3/yaml from the PyYAML package to blender/python/lib/python3.x/
 
 worldname = str(sys.argv[6])
-worldsettings = json.load(open('config.json'))['systemSettings']
+worldsettings = yaml.load(open('config.yaml'))['worlds'][worldname]
 logdir = os.path.expanduser(worldsettings['logdir'])
 worlddir = os.path.expanduser(worldsettings['worlddir'])
 outputdir = os.path.expanduser(worldsettings['outputdir'])
@@ -108,7 +111,7 @@ def exportCellList():
 
 def addObj(obj):
     x1,z1,x2,z2 = obj
-    call(["java", "-jar", jmc2obj, "-s", "--objfile=x"+str(x1)+"-z"+str(z1)+".obj", "--export=obj", "--output="+workingdir, "--height=50,256", "--area="+str(x1)+","+str(z1)+","+str(x2+32)+","+str(z2+64),worlddir+worldname]) #this does the actual export
+#    call(["java", "-jar", jmc2obj, "-s", "--objfile=x"+str(x1)+"-z"+str(z1)+".obj", "--export=obj", "--output="+workingdir, "--height=50,256", "--area="+str(x1)+","+str(z1)+","+str(x2+32)+","+str(z2+64),worlddir+worldname]) #this does the actual export
     objlist.append(obj)
     return()
 
