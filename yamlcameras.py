@@ -19,8 +19,9 @@ fov = 69
 viewdistance = 15
 cellList = []
 objlist = []
-cameralist = []
+cameralist = {}
 activecameralist = []
+yamlcameras = []
 
 name = 1
 
@@ -53,7 +54,7 @@ def dirtyTrig(x,y,z): # This function is full of dirty dirty trig to return yaw 
                 yaw = 270+yaw
             else:
                 yaw = 90+yaw
-    return (yaw,pitch)
+    return {'yaw':yaw,'pitch':pitch}
 
 def pointFinder(x, z, yaw, length):
     yaw = (90 + yaw)%360
@@ -73,6 +74,23 @@ def addCell(x,z):
             return()
     cellList.append(cell)
     return()
+
+def boundingBox(poly):
+    NW = []
+    SE = []
+    top = poly[0][1]
+    bottom = poly[0][1]
+    left = poly[0][0]
+    right = poly[0][0]
+    if poly[1][1] < top: top = int(poly[1][1])
+    if poly[2][1] < top: top = int(poly[2][1])
+    if poly[1][1] > bottom: bottom = int(poly[1][1])
+    if poly[2][1] > bottom: bottom = int(poly[2][1])
+    if poly[1][0] < left: left = int(poly[1][0])
+    if poly[2][0] < left: left = int(poly[2][0])
+    if poly[1][0] > right: right = int(poly[1][0])
+    if poly[2][0] > right: right = int(poly[2][0])
+    return({'NW':[top, left],'SE':[bottom, right]})
 
 def exportCellList():
     print()
@@ -226,19 +244,18 @@ def placeCamera(player, viewdistance, fov, poly, name):
 
 def addCamera(location, rotation, viewdistance, fov, name):
     camera = getPoly(location, rotation, viewdistance, fov, name)
-    cameralist.append(camera)
+    cameralist[int(name)] = camera
     return
 
 def getPoly(location, rotation, viewdistance, fov, name):
     x1,y,z1 = location
-    yaw = rotation[0]
+    yaw = rotation['yaw']
     viewdistance = (viewdistance+1) * 16
     xq,zq = pointFinder(x1,z1, yaw, viewdistance)
     x2,z2 = pointFinder(xq,zq, ((yaw+270) % 360), (viewdistance)*math.tan((fov*(math.pi/180))*0.725))
     x3,z3 = pointFinder(xq,zq, ((yaw+90) % 360), (viewdistance)*math.tan((fov*(math.pi/180))*0.725))
-    poly = (x1,z1),(x2,z2),(x3,z3)
-    position = location, rotation
-    return(position, viewdistance, fov, poly, name)
+    poly = [[x1,z1],[x2,z2],[x3,z3]]
+    return({'filename':name,'description':'Blarg!','poly':poly,'boundingbox':boundingBox(poly),'viewdistance':int(viewdistance/16),'fov':fov,'rotation':rotation, 'location':location})  #  location, rotation, viewdistance, fov, poly, boundingBox(poly), name)
 
 def addActiveCamera(cam):
     if not activecameralist:
@@ -265,7 +282,7 @@ ofile = csv.reader(csvfile, delimiter=',')
 for row in ofile:
     x, y, z = float(row[3]), float(row[4]), float(row[5])
     targetx, targety, targetz = float(row[6]), float(row[7]), float(row[8])
-    addCamera((x,y,z),dirtyTrig(targetx,targety,targetz),viewdistance,fov, name)
+    addCamera([x,y,z],dirtyTrig(targetx,targety,targetz),viewdistance,fov, name)
     name = name + 1
 csvfile.close()
 
@@ -274,60 +291,8 @@ ofile = csv.reader(updatefile, delimiter=',')
 updatelist = list(ofile)
 updatefile.close()
 
-for cam in cameralist:
-    result = 0
-    i=0
-    while result == 0 and i < len(updatelist):
-        line = updatelist[i]
-        if pointInsidePolygon(float(line[2]),float(line[4]),cam[3]):
-            addActiveCamera(cam)
-            result = 1
-        else:
-            i=i+1
-    print(cam)
+print(yaml.dump(cameralist))
 
-for cam in activecameralist:
-    placeCamera(cam[0],cam[1],cam[2],cam[3],cam[4])
-    findCells(cam[0],cam[1],cam[2],cam[3],cam[4])
-
-cellList = sorted(cellList, key=lambda cell: cell[0])
-cellList = sorted(cellList, key=lambda cell: cell[1])
-
-if cellList != []:
-    exportCellList()
-    importObjlist()
-    print()
-    print('Looping Cameras')
-    print()
-else:
-    print('Nothing to update!')
-
-c=0
-
-for mat in bpy.data.materials: # Illuminate!
-    if mat.name.find('torch_flame') != -1:
-        mat.emit = 15
-#NOTE: Blender's internal renderer imports torches with single sided planes.
-#TL;DR: Torches will only cast light from three quarters.  Solution pending.
-
-sceneKey = bpy.data.scenes.keys()[0]
-cameraNames=''
-
-for obj in bpy.data.objects:
-    # Find cameras that match cameraNames
-    if ( obj.type =='CAMERA') and ( cameraNames == '' or obj.name.find(cameraNames) != -1) :
-        print("Rendering scene["+sceneKey+"] with Camera["+obj.name+"]")
-
-        # Set Scenes camera and output filename
-        bpy.data.scenes[sceneKey].camera = obj
-        bpy.data.scenes[sceneKey].render.image_settings.file_format = 'PNG'
-        cam = activecameralist[c]
-        bpy.data.scenes[sceneKey].render.filepath = str(outputdir)+worldname+'-'+str(cam[4])
-        print(worldname+'-'+str(cam[4]))
-#        bpy.data.scenes[sceneKey].render.resolution_x = 768
-#        bpy.data.scenes[sceneKey].render.resolution_y = 768
-#        bpy.data.scenes[sceneKey].render.resolution_percentage = 100
-        # Render Scene and store the scene
-#        bpy.ops.render.render( write_still=True )
-        c = c + 1
-print('Done!')
+#for cam in cameralist:
+#    print(yaml.dump(cam))
+#print('Done!')
