@@ -19,8 +19,8 @@ fov = 69
 viewdistance = 15
 cellList = []
 objlist = []
-cameralist = []
-activecameralist = []
+cameralist = {}
+activecameralist = {}
 
 name = 1
 
