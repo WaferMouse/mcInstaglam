@@ -244,7 +244,7 @@ def placeCamera(player, viewdistance, fov, poly, name):
 
 def addCamera(location, rotation, viewdistance, fov, name):
     camera = getPoly(location, rotation, viewdistance, fov, name)
-    cameralist[int(name)] = camera
+    cameralist[str(name)] = camera
     return
 
 def getPoly(location, rotation, viewdistance, fov, name):
@@ -255,7 +255,7 @@ def getPoly(location, rotation, viewdistance, fov, name):
     x2,z2 = pointFinder(xq,zq, ((yaw+270) % 360), (viewdistance)*math.tan((fov*(math.pi/180))*0.725))
     x3,z3 = pointFinder(xq,zq, ((yaw+90) % 360), (viewdistance)*math.tan((fov*(math.pi/180))*0.725))
     poly = [[x1,z1],[x2,z2],[x3,z3]]
-    return({'filename':name,'description':'Blarg!','poly':poly,'boundingbox':boundingBox(poly),'viewdistance':int(viewdistance/16),'fov':fov,'rotation':rotation, 'location':location})  #  location, rotation, viewdistance, fov, poly, boundingBox(poly), name)
+    return({'filename':str(name),'description':'Blarg!','poly':poly,'boundingbox':boundingBox(poly),'viewdistance':int(viewdistance/16),'fov':fov,'rotation':rotation, 'location':location})  #  location, rotation, viewdistance, fov, poly, boundingBox(poly), name)
 
 def addActiveCamera(cam):
     if not activecameralist:
@@ -291,7 +291,7 @@ ofile = csv.reader(updatefile, delimiter=',')
 updatelist = list(ofile)
 updatefile.close()
 
-print(yaml.dump(cameralist))
+yaml.dump(cameralist, open(jmc2objdir+'cameras.yaml', 'w'))
 
 #for cam in cameralist:
 #    print(yaml.dump(cam))
