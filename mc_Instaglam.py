@@ -28,33 +28,6 @@ def main():
     #do something with this eventually
     return
 
-def dirtyTrig(x,y,z): # This function is full of dirty dirty trig to return yaw and pitch in the Minecraft system for a given target coordinate
-    hyp = math.sqrt((abs(x)**2)+(abs(z)**2)) # It's probably best to ignore the horrors that lie within
-    if hyp == 0:
-        if y>0:
-            pitch = 90
-        else:
-            pitch = 0-90
-    else:
-        pitch = math.atan(y/hyp) # It's a workaround until Skript implements yaw and pitch
-        pitch = (pitch*(180/math.pi)) % 360
-        if pitch > 180:
-            pitch = 0-(360-pitch)
-        if x == 0:
-            if z > 1:
-                yaw = 0
-            else:
-                yaw = 180
-        else:
-            yaw = (math.atan(abs(z)/abs(x)))*(180/math.pi)
-            if x>0: yaw = 0-yaw
-            if z>0: yaw = 0-yaw
-            if x>0:
-                yaw = 270+yaw
-            else:
-                yaw = 90+yaw
-    return (yaw,pitch)
-
 def pointFinder(x, z, yaw, length):
     yaw = (90 + yaw)%360
     angle = yaw
