@@ -195,8 +195,6 @@ print('Placing cameras')
 print()
 
 for cam in activecameralist[worldname]:
-    print(cam)
-    print(cameralist['worlds'][worldname][cam])
     placeCamera(cameralist['worlds'][worldname][cam])
     findCells(cameralist['worlds'][worldname][cam]['poly'])
 
