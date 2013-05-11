@@ -15,25 +15,14 @@ jmc2objdir = os.path.expanduser(worldsettings['jmc2objdir'])
 jmc2obj = jmc2objdir+worldsettings['jmc2obj']
 os.chdir(jmc2objdir)
 
-fov = 69
-viewdistance = 15
 cellList = []
 objlist = []
-cameralist = {}
-activecameralist = {}
-
-name = 1
+cameralist = yaml.load(open(logdir+'cameras.yaml'))
+activecameralist = yaml.load(open(logdir+'activecameras.yaml'))
 
 def main():
     #do something with this eventually
     return
-
-def pointFinder(x, z, yaw, length):
-    yaw = (90 + yaw)%360
-    angle = yaw
-    x2 = math.cos(angle*(math.pi/180)) * length
-    z2 = math.sin(angle*(math.pi/180)) * length
-    return (x+x2, z+z2)
 
 def addCell(x,z):
     cell = x,z
@@ -91,7 +80,7 @@ def importObjlist():
     print()
     count = 0
     for obj in objlist:
-#        bpy.ops.import_scene.obj(filepath=workingdir+"x"+str(obj[0])+"-z"+str(obj[1])+".obj") #does the work of importing the object to blender
+        bpy.ops.import_scene.obj(filepath=workingdir+"x"+str(obj[0])+"-z"+str(obj[1])+".obj") #does the work of importing the object to blender
 #        os.remove(workingdir+"x"+str(obj[0])+"-z"+str(obj[1])+".obj") #remove .obj file to prevent eating HDD space
         count = count + 1
         print()
@@ -120,7 +109,7 @@ def pointInsidePolygon(x,y,poly):
         p1x,p1y = p2x,p2y
     return inside
     
-def findCells(pos, viewdistance, fov, poly, name):
+def findCells(poly):
     (x1,z1),(x2,z2),(x3,z3) = poly
     top = int(z1)
     bottom = int(z1)
@@ -187,42 +176,15 @@ def doLineSegmentsIntersect(x1,y1,x2,y2,x3,y3,x4,y4):
     d4 = computeDirection(x1, y1, x2, y2, x4, y4)
     return (((d1 > 0 and d2 < 0) or (d1 < 0 and d2 > 0)) and ((d3 > 0 and d4 < 0) or (d3 < 0 and d4 > 0))) or (d1 == 0 and isOnSegment(x3, y3, x4, y4, x1, y1)) or (d2 == 0 and isOnSegment(x3, y3, x4, y4, x2, y2)) or (d3 == 0 and isOnSegment(x1, y1, x2, y2, x3, y3)) or (d4 == 0 and isOnSegment(x1, y1, x2, y2, x4, y4))
 
-def placeCamera(player, viewdistance, fov, poly, name):
-    location, rotation = mcCamera(player[0],player[1]) # narf!
+def placeCamera(camera):
+    location, rotation = mcCamera(camera['position'],(camera['rotation']['yaw'],camera['rotation']['pitch']))
     bpy.ops.object.camera_add(location=location, rotation=rotation)
     cam = bpy.data.cameras[len(bpy.data.cameras)-1]
     cam.lens_unit = 'DEGREES'
-    cam.angle = fov*(math.pi/180)*1.45
+    cam.angle = camera['fov']*(math.pi/180)*1.45
     cam.sensor_fit = 'HORIZONTAL'
-    cam.clip_end = viewdistance*16
+    cam.clip_end = camera['viewdistance']*16
     return
-
-def addCamera(location, rotation, viewdistance, fov, name):
-    camera = getPoly(location, rotation, viewdistance, fov, name)
-    cameralist.append(camera)
-    return
-
-def getPoly(location, rotation, viewdistance, fov, name):
-    x1,y,z1 = location
-    yaw = rotation[0]
-    viewdistance = (viewdistance+1) * 16
-    xq,zq = pointFinder(x1,z1, yaw, viewdistance)
-    x2,z2 = pointFinder(xq,zq, ((yaw+270) % 360), (viewdistance)*math.tan((fov*(math.pi/180))*0.725))
-    x3,z3 = pointFinder(xq,zq, ((yaw+90) % 360), (viewdistance)*math.tan((fov*(math.pi/180))*0.725))
-    poly = (x1,z1),(x2,z2),(x3,z3)
-    position = location, rotation
-    return(position, viewdistance, fov, poly, name)
-
-def addActiveCamera(cam):
-    if not activecameralist:
-        activecameralist.append(cam)
-        return()
-    i = 0
-    for i in activecameralist:
-        if i == cam:
-            return()
-    activecameralist.append(cam)
-    return()
 
 ###########
 ########### Time for the main loops!
@@ -232,36 +194,11 @@ print()
 print('Placing cameras')
 print()
 
-csvfile = open(logdir+'blendit-'+worldname+'.log', 'r', newline='')
-ofile = csv.reader(csvfile, delimiter=',')
-
-for row in ofile:
-    x, y, z = float(row[3]), float(row[4]), float(row[5])
-    targetx, targety, targetz = float(row[6]), float(row[7]), float(row[8])
-    addCamera((x,y,z),dirtyTrig(targetx,targety,targetz),viewdistance,fov, name)
-    name = name + 1
-csvfile.close()
-
-updatefile = open(logdir+'update-'+worldname+'.log', 'r', newline='')
-ofile = csv.reader(updatefile, delimiter=',')
-updatelist = list(ofile)
-updatefile.close()
-
-for cam in cameralist:
-    result = 0
-    i=0
-    while result == 0 and i < len(updatelist):
-        line = updatelist[i]
-        if pointInsidePolygon(float(line[2]),float(line[4]),cam[3]):
-            addActiveCamera(cam)
-            result = 1
-        else:
-            i=i+1
+for cam in activecameralist[worldname]:
     print(cam)
-
-for cam in activecameralist:
-    placeCamera(cam[0],cam[1],cam[2],cam[3],cam[4])
-    findCells(cam[0],cam[1],cam[2],cam[3],cam[4])
+    print(cameralist['worlds'][worldname][cam])
+    placeCamera(cameralist['worlds'][worldname][cam])
+    findCells(cameralist['worlds'][worldname][cam]['poly'])
 
 cellList = sorted(cellList, key=lambda cell: cell[0])
 cellList = sorted(cellList, key=lambda cell: cell[1])
@@ -275,13 +212,13 @@ if cellList != []:
 else:
     print('Nothing to update!')
 
-c=0
-
 for mat in bpy.data.materials: # Illuminate!
     if mat.name.find('torch_flame') != -1:
         mat.emit = 15
 #NOTE: Blender's internal renderer imports torches with single sided planes.
 #TL;DR: Torches will only cast light from three quarters.  Solution pending.
+
+c=0
 
 sceneKey = bpy.data.scenes.keys()[0]
 cameraNames=''
@@ -294,9 +231,9 @@ for obj in bpy.data.objects:
         # Set Scenes camera and output filename
         bpy.data.scenes[sceneKey].camera = obj
         bpy.data.scenes[sceneKey].render.image_settings.file_format = 'PNG'
-        cam = activecameralist[c]
-        bpy.data.scenes[sceneKey].render.filepath = str(outputdir)+worldname+'-'+str(cam[4])
-        print(worldname+'-'+str(cam[4]))
+        cam = activecameralist[worldname][c]
+        bpy.data.scenes[sceneKey].render.filepath = str(outputdir)+worldname+'-'+str(cam)
+        print(worldname+'-'+str(cam))
 #        bpy.data.scenes[sceneKey].render.resolution_x = 768
 #        bpy.data.scenes[sceneKey].render.resolution_y = 768
 #        bpy.data.scenes[sceneKey].render.resolution_percentage = 100
