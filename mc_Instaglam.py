@@ -1,4 +1,4 @@
-import bpy, math, csv, sys, bgl, blf, os
+import bpy, math, sys, bgl, blf, os
 from bpy import data, ops, props, types, context
 from math import pi
 from subprocess import call
