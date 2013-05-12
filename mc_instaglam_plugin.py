@@ -8,24 +8,24 @@ from datetime import datetime
 import math
 import os
 
-global cameras
+global cameralist
 global settings
 
-cameras = {}
+cameralist = {}
 settings = {}
-activecameras = {}
+activecameralist = {}
 
 @hook.enable
 def onEnable():
     print "Hiyaaa!!!"
     global settings
-    global cameras
+    global cameralist
     os.chdir(os.path.expanduser('~/spigot/1.4.7/lib/Lib'))
     settings = yaml.load(open('config.yaml'))
-    cameras = yaml.load(open('cameras.yaml'))
+    cameralist = yaml.load(open('cameras.yaml'))
     for world in settings['worlds']:
-        activecameras[world] = []
-    yaml.dump(activecameras, open('activecameras.yaml', 'w'))
+        activecameralist[world] = []
+    yaml.dump(activecameralist, open('activecameras.yaml', 'w'))
 
 @hook.command("instaglam")
 def onCommand(sender, args):
@@ -46,13 +46,18 @@ def onCommand(sender, args):
             camera['filename'] = str(time+'-'+world+'-'+name)
             camera['poly'] = getPoly(location,15,69)
             camera['boundingbox'] = boundingBox(camera['poly'])
-            cameras['worlds'][world][str(time+'-'+name)] = camera
-            yaml.dump(cameras, open('cameras.yaml', 'w'))
-            activecameras[world].append(str(time+'-'+name))
-            yaml.dump(activecameras, open('activecameras.yaml', 'w'))
+            cameralist['worlds'][world][str(time+'-'+name)] = camera
+            yaml.dump(cameralist, open('cameras.yaml', 'w'))
+            activecameralist[world].append(str(time+'-'+name))
+            yaml.dump(activecameralist, open('activecameras.yaml', 'w'))
             msg(sender,'Camera saved!')
         else:
             msg(sender,'Instaglam not available on this world.')
+
+@hook.event("block.BlockBreakEvent", "normal")
+def onBlockBreak(event):
+    print(event.getLocation())
+#    checkBlock(event.getLocation)
 
 @hook.disable
 def onDisable():
@@ -89,3 +94,31 @@ def boundingBox(poly):
     if poly[1][0] > right: right = int(poly[1][0])
     if poly[2][0] > right: right = int(poly[2][0])
     return({'NW':[top, left],'SE':[bottom, right]})
+
+def checkBlock(location)
+    world = location.world.name
+    if world in cameralist['worlds']:
+        for cam in cameralist['worlds'][world]:
+            if not str(cam) in activecameralist[world]:
+                boundingbox = cam['boundingbox']
+                if (boundingbox['NW'][1] <= location.x <= boundingbox['SE'][1]) and (boundingbox['NW'][0] <= location.z <= boundingbox['SE'][0]):
+                    if pointInsidePolygon(location.x,location.z,cam['poly']):
+                        activecameralist[world].append(str(cam))
+                        yaml.dump(activecameralist, open('activecameras.yaml', 'w'))
+    return
+
+def pointInsidePolygon(x,y,poly):
+    n = len(poly)
+    inside =False
+    p1x,p1y = poly[0]
+    for i in range(n+1):
+        p2x,p2y = poly[i % n]
+        if y > min(p1y,p2y):
+            if y <= max(p1y,p2y):
+                if x <= max(p1x,p2x):
+                    if p1y != p2y:
+                        xinters = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+                    if p1x == p2x or x <= xinters:
+                        inside = not inside
+        p1x,p1y = p2x,p2y
+    return inside
